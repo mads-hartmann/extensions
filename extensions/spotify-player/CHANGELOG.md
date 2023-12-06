@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Optimisation] - 2023-12-20
+
+- The `Your Library` command now loads 300 instead of 50 albums, artists, playlists, shows.
+
 ## [Add Windows support] - 2025-11-14
 
 - Added Windows to platforms
