@@ -166,6 +166,22 @@
           "required": false,
           "type": "dropdown",
           "placeholder": "Default View"
+        },
+        {
+          "name": "databasePath",
+          "title": "Database Path",
+          "description": "Path to the SQLite database file",
+          "type": "textfield",
+          "default": "/tmp/raycast-spotify-player.db",
+          "required": false
+        },
+        {
+          "name": "cacheRefreshInterval",
+          "title": "Cache Refresh Interval (hours)",
+          "description": "How often to automatically refresh the cache (in hours)",
+          "type": "textfield",
+          "default": "24",
+          "required": false
         }
       ]
     },
@@ -533,6 +549,13 @@
       "subtitle": "Spotify",
       "description": "Find and display lyrics for the currently playing song from Genius.",
       "mode": "view"
+    },
+    {
+      "name": "refreshLibraryCache",
+      "title": "Refresh Library Cache",
+      "subtitle": "Spotify",
+      "description": "Manually refresh the cached library data from Spotify API",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -580,12 +603,14 @@
     "async-retry": "^1.3.3",
     "genius-lyrics": "^4.4.7",
     "node-fetch": "^3.3.2",
-    "oazapfts": "^4.10.0"
+    "oazapfts": "^4.10.0",
+    "sql.js": "^1.10.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^22.17.2",
     "@types/react": "^19.1.10",
+    "@types/sql.js": "^1.4.4",
     "eslint": "^9.33.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"

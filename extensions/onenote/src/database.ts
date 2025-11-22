@@ -19,7 +19,7 @@ export const create_or_update_db = async (force_update = false) => {
   const now = Date.now();
 
   if (!SQL) {
-    SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
+    SQL = await initSqlJs({ locateFile: () => resolve(envirSomeonment.assetsPath, "sql-wasm.wasm") });
   }
 
   // to cope with successive calls

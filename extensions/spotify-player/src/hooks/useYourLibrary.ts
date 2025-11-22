@@ -1,36 +1,50 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getUserPlaylists } from "../api/getUserPlaylists";
-import { getMySavedAlbums } from "../api/getMySavedAlbums";
-import { getFollowedArtists } from "../api/getFollowedArtists";
-import { getMySavedTracks } from "../api/getMySavedTracks";
-import { getMySavedShows } from "../api/getMySavedShows";
-import { getMySavedEpisodes } from "../api/getMySavedEpisodes";
+import {
+  shouldRefreshCache,
+  refreshCacheFromAPI,
+  getCachedPlaylists,
+  getCachedAlbums,
+  getCachedArtists,
+  getCachedTracks,
+  getCachedShows,
+  getCachedEpisodes,
+} from "../helpers/libraryCache";
 
 type UseMyLibraryProps = {
   execute?: boolean;
   keepPreviousData?: boolean;
 };
 
+async function fetchLibraryData() {
+  // Check if cache needs refresh
+  const needsRefresh = await shouldRefreshCache();
+
+  if (needsRefresh) {
+    // Refresh cache from API
+    await refreshCacheFromAPI();
+  }
+
+  // Read from cache
+  const [playlistsData, albumsData, artistsData, tracksData, showsData, episodesData] = await Promise.all([
+    getCachedPlaylists(),
+    getCachedAlbums(),
+    getCachedArtists(),
+    getCachedTracks(),
+    getCachedShows(),
+    getCachedEpisodes(),
+  ]);
+
+  return [playlistsData, albumsData, artistsData, tracksData, showsData, episodesData];
+}
+
 export function useYourLibrary(options: UseMyLibraryProps = {}) {
   const {
     data = [],
     error,
     isLoading,
-  } = useCachedPromise(
-    () =>
-      Promise.all([
-        getUserPlaylists({ limit: 300 }),
-        getMySavedAlbums({ limit: 300 }),
-        getFollowedArtists({ limit: 300 }),
-        getMySavedTracks({ limit: 50 }),
-        getMySavedShows({ limit: 300 }),
-        getMySavedEpisodes({ limit: 50 }),
-      ]),
-    [],
-    {
-      keepPreviousData: options?.keepPreviousData,
-    },
-  );
+  } = useCachedPromise(fetchLibraryData, [], {
+    keepPreviousData: options?.keepPreviousData,
+  });
 
   const [playlistsData, albumsData, artistsData, tracksData, showsData, episodesData] = data;
 
