@@ -1,6 +1,7 @@
 import { ComponentProps, useState } from "react";
 import { Grid, List } from "@raycast/api";
 import { View } from "./components/View";
+import { LibraryDataProvider } from "./components/LibraryDataProvider";
 import { useYourLibrary } from "./hooks/useYourLibrary";
 import { ArtistsSection } from "./components/ArtistsSection";
 import { AlbumsSection } from "./components/AlbumsSection";
@@ -118,7 +119,9 @@ function YourLibraryCommand() {
 export default function Command() {
   return (
     <View>
-      <YourLibraryCommand />
+      <LibraryDataProvider>
+        <YourLibraryCommand />
+      </LibraryDataProvider>
     </View>
   );
 }

@@ -199,10 +199,12 @@ export async function executeWrite(dbPath: string, sql: string, params: any[] = 
 
 /**
  * Execute multiple writes in a transaction
+ * @param saveImmediately - If true, saves database to file immediately. If false, defers saving.
  */
 export async function executeTransaction(
   dbPath: string,
   operations: Array<{ sql: string; params: any[] }>,
+  saveImmediately: boolean = true,
 ): Promise<void> {
   try {
     const db = await getDatabase(dbPath);
@@ -216,14 +218,29 @@ export async function executeTransaction(
     }
 
     db.run("COMMIT");
-    saveDatabase(dbPath);
+
+    // Only save if explicitly requested
+    if (saveImmediately) {
+      saveDatabase(dbPath);
+    }
   } catch (error) {
-    console.error("Error executing transaction:", error);
+    console.error(`[DB] Error executing transaction (${operations.length} ops) - Memory: ${getMemoryUsageMB()}`, error);
     if (dbInstance) {
       dbInstance.run("ROLLBACK");
     }
     throw error;
   }
+}
+
+/**
+ * Get memory usage in MB for logging
+ */
+function getMemoryUsageMB(): string {
+  if (typeof process !== "undefined" && process.memoryUsage) {
+    const usage = process.memoryUsage();
+    return `RSS: ${Math.round(usage.rss / 1024 / 1024)}MB, Heap: ${Math.round(usage.heapUsed / 1024 / 1024)}MB/${Math.round(usage.heapTotal / 1024 / 1024)}MB`;
+  }
+  return "N/A";
 }
 
 /**
@@ -233,6 +250,9 @@ export function saveDatabase(dbPath: string): void {
   if (!dbInstance) return;
 
   try {
+    const memBefore = getMemoryUsageMB();
+    console.log(`[DB] Saving database - Memory before: ${memBefore}`);
+
     // Ensure directory exists
     const dir = path.dirname(dbPath);
     if (!fs.existsSync(dir)) {
@@ -241,8 +261,14 @@ export function saveDatabase(dbPath: string): void {
 
     // Write database to file
     const data = dbInstance.export();
+    const dbSizeMB = Math.round(data.length / 1024 / 1024);
+    console.log(`[DB] Database export size: ${dbSizeMB}MB`);
     const buffer = Buffer.from(data);
+    const memAfterExport = getMemoryUsageMB();
+    console.log(`[DB] Memory after export: ${memAfterExport}`);
     fs.writeFileSync(dbPath, buffer);
+    const memAfter = getMemoryUsageMB();
+    console.log(`[DB] Database saved - Memory after: ${memAfter}`);
   } catch (error) {
     console.error("Error saving database:", error);
     throw error;
